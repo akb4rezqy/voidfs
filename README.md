@@ -188,4 +188,4 @@ tests/                integration and service tests
 
 ## License
 
-No license has been chosen yet. Add one before accepting outside contributions.
+VoidFS is available under the [MIT License](LICENSE).
