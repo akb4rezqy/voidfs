@@ -1,0 +1,51 @@
+{{define "login.html"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>{{.Title}} · Void</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/app.css?v=20260722-3">
+</head>
+<body class="login-page">
+  <header class="nav-bar login-nav">
+    <div class="wordmark"><span class="wordmark-mark">V</span><span>Void</span></div>
+    <div class="nav-context"><span class="status-dot"></span><span>VPS access</span></div>
+  </header>
+
+  <main class="login-main">
+    <section class="login-copy">
+      <p class="eyebrow">BROWSER-NATIVE SFTP</p>
+      <h1>Your server.<br><em>Anywhere.</em></h1>
+      <p>Access the entire VPS filesystem from any browser. Built for devices where installing an FTP client isn't an option.</p>
+      <div class="login-features" aria-label="Product features">
+        <span><i></i>Full filesystem access</span>
+        <span><i></i>Built-in code editor</span>
+        <span><i></i>Linux PAM authentication</span>
+      </div>
+    </section>
+
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="login-glow"></div>
+      <div class="card-content">
+        <p class="panel-kicker">SECURE SESSION</p>
+        <h2 id="login-title">Sign in to your VPS</h2>
+        <p class="card-description">Use the same root credentials as your SSH login.</p>
+        <form method="post" action="/login" class="login-form">
+          <label for="username">Username</label>
+          <input id="username" name="username" value="root" autocomplete="username" autocapitalize="none" spellcheck="false">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="Your VPS password" autocomplete="current-password">
+          <button class="button button-primary login-submit" type="submit">Open filesystem</button>
+        </form>
+        <p class="security-note"><span class="status-dot"></span>Credentials are verified by Linux PAM and never stored.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,12 @@
+server:
+  addr: ":8787"
+security:
+  session_secret: "replace-with-a-long-random-secret"
+paths:
+  root_dir: "/"
+limits:
+  max_upload_bytes: 10485760
+  max_edit_bytes: 1048576
+auth:
+  provider: "pam"
+  allowed_user: "root"

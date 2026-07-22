@@ -1,0 +1,100 @@
+{{define "dashboard.html"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>{{.Title}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/vendor/codemirror/lib/codemirror.min.css">
+  <link rel="stylesheet" href="/static/vendor/codemirror/theme/material-darker.min.css">
+  <link rel="stylesheet" href="/static/css/app.css?v=20260722-3">
+</head>
+<body class="app-page">
+  <header class="nav-bar">
+    <a class="wordmark" href="/" aria-label="Void home">
+      <span class="wordmark-mark">V</span>
+      <span>Void</span>
+    </a>
+    <div class="nav-context">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span>Connected to VPS</span>
+    </div>
+    <div class="nav-actions">
+      <span class="root-pill"><span>ROOT</span>{{.RootDir}}</span>
+      <form method="post" action="/logout">
+        <button class="button button-outline" type="submit">Sign out</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="product-shell view-files">
+      <aside class="file-panel" aria-label="File browser">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">FILES</p>
+            <h2>Filesystem</h2>
+          </div>
+          <div class="panel-actions">
+            <div class="view-switcher" aria-label="Workspace view">
+              <button class="view-button is-active" type="button" data-view="files">Files</button>
+              <button class="view-button" type="button" data-view="split">Split</button>
+              <button class="view-button" type="button" data-view="editor">Editor</button>
+            </div>
+            <button id="new-folder-btn" class="icon-button" type="button" title="New folder" aria-label="New folder">+</button>
+            <label class="icon-button upload-label" title="Upload file" aria-label="Upload file">
+              ↑
+              <input id="upload-input" type="file" hidden>
+            </label>
+          </div>
+        </div>
+        <nav class="path-line" aria-label="Current path"><span class="status-dot"></span><div id="browse-path" class="breadcrumbs"></div></nav>
+        <ul id="file-list" class="file-list">
+          <li class="loading-row">Loading filesystem…</li>
+        </ul>
+      </aside>
+
+      <section id="code-window" class="code-window is-hidden" aria-label="Code editor">
+        <div class="window-chrome">
+          <div class="editor-view-switcher view-switcher" aria-label="Editor workspace view">
+            <button class="view-button" type="button" data-view="files">Files</button>
+            <button class="view-button" type="button" data-view="split">Split</button>
+            <button class="view-button" type="button" data-view="editor">Editor</button>
+          </div>
+          <span id="current-path" class="window-title">Select a file to begin</span>
+          <div class="save-area">
+            <span id="save-status" class="save-status" role="status" aria-live="polite"></span>
+            <button id="save-btn" class="button button-primary" type="button" disabled>Save changes</button>
+            <button id="close-editor-btn" class="icon-button close-editor" type="button" title="Close editor" aria-label="Close editor">×</button>
+          </div>
+        </div>
+        <div class="editor-status">
+          <span>EDITOR</span>
+          <span class="editor-hint">⌘ / Ctrl + S to save</span>
+        </div>
+        <textarea id="editor" spellcheck="false">// Select a text file from the filesystem.
+// Your code will appear here.
+</textarea>
+      </section>
+    </section>
+  </main>
+
+  <script src="/static/vendor/codemirror/lib/codemirror.min.js"></script>
+  <script src="/static/vendor/codemirror/mode/javascript/javascript.min.js"></script>
+  <script src="/static/vendor/codemirror/mode/css/css.min.js"></script>
+  <script src="/static/vendor/codemirror/mode/xml/xml.min.js"></script>
+  <script src="/static/vendor/codemirror/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="/static/vendor/codemirror/mode/markdown/markdown.min.js"></script>
+  <script src="/static/vendor/codemirror/mode/python/python.min.js"></script>
+  <script src="/static/vendor/codemirror/mode/shell/shell.min.js"></script>
+  <script src="/static/vendor/codemirror/mode/go/go.min.js"></script>
+  <script src="/static/js/app.js?v=20260722-3"></script>
+  <script src="/static/js/editor.js?v=20260722-3"></script>
+  <script src="/static/js/upload.js?v=20260722-3"></script>
+</body>
+</html>
+{{end}}

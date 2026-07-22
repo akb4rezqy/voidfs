@@ -1,0 +1,22 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Build output
+/bin/
+*.out
+
+# Runtime data
+/storage/data/*
+!/storage/data/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
