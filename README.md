@@ -1,6 +1,6 @@
 # VoidFS
 
-VoidFS is a small web file manager for a Linux server. It is meant for the awkward case where you have a VPS but only a browser, such as an old iPad that cannot install an SFTP client.
+VoidFS is a small web file manager for a Linux server. It is meant for the awkward case where you have a VPS but only a browser.
 
 It browses the server filesystem, uploads and downloads files, and includes a code editor. Login goes through Linux PAM, so VoidFS uses an existing server account instead of keeping a separate password database.
 
