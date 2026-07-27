@@ -1,5 +1,9 @@
 # VoidFS
 
+[![Go 1.22+](https://img.shields.io/badge/Go-1.22%2B-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Linux](https://img.shields.io/badge/platform-Linux-FCC624?logo=linux&logoColor=black)](https://www.kernel.org/)
+[![MIT License](https://img.shields.io/badge/license-MIT-11ff99)](LICENSE)
+
 VoidFS is a small web file manager for a Linux server. It is meant for the awkward case where you have a VPS but only a browser.
 
 It browses the server filesystem, uploads and downloads files, and includes a code editor. Login goes through Linux PAM, so VoidFS uses an existing server account instead of keeping a separate password database.
