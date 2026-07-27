@@ -28,7 +28,12 @@ func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	if err := h.Authenticator.Authenticate(username, password); err != nil {
-		http.Error(w, "invalid credentials", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = h.Templates.ExecuteTemplate(w, "login.html", map[string]any{
+			"Title":    "Login",
+			"Username": username,
+			"Error":    "The username or password is incorrect. Please try again.",
+		})
 		return
 	}
 	h.Cookies.SetSession(w, username)

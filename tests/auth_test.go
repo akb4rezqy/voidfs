@@ -91,6 +91,16 @@ func TestLoginRejectsInvalidVPSCredentials(t *testing.T) {
 	if rr.Code != http.StatusUnauthorized {
 		t.Fatalf("expected %d, got %d", http.StatusUnauthorized, rr.Code)
 	}
+	body := rr.Body.String()
+	if !strings.Contains(body, "Access denied") || !strings.Contains(body, "The username or password is incorrect") {
+		t.Fatalf("expected styled credential error, got body=%s", body)
+	}
+	if !strings.Contains(body, `value="vps-user"`) {
+		t.Fatalf("expected submitted username to be retained, got body=%s", body)
+	}
+	if strings.Contains(body, `value="wrong"`) {
+		t.Fatal("password must not be rendered back into the form")
+	}
 	if len(rr.Result().Cookies()) != 0 {
 		t.Fatal("expected no session cookie for invalid credentials")
 	}

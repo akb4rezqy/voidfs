@@ -9,8 +9,10 @@ It browses the server filesystem, uploads and downloads files, and includes a co
 - Browse the filesystem from `/` or a configured root directory
 - Open, edit, and save text files
 - Upload and download files
+- Create empty files and open them in the editor
 - Create folders
 - Rename and delete files or folders
+- Select multiple files or folders to delete, zip, or unzip them
 - Jump through directories with clickable breadcrumbs
 - Switch between full file view, split view, and full editor view
 - Sign in with a Linux account through PAM

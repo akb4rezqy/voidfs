@@ -217,13 +217,41 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .breadcrumbs { min-width: 0; display: flex; align-items: center; gap: 2px; overflow-x: auto; color: var(--stone); font-family: var(--mono); font-size: 11px; white-space: nowrap; }
 .breadcrumbs button { min-width: 0; padding: 4px 2px; border: 0; background: transparent; color: var(--charcoal); cursor: pointer; font: inherit; text-align: left; }
 .breadcrumbs button:hover { color: var(--ink); text-decoration: underline; }
+.selection-bar {
+  min-height: 46px;
+  padding: 6px 12px 6px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--hairline-strong);
+  background: rgba(59,158,255,.08);
+  color: var(--body);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.selection-bar[hidden] { display: none; }
+.selection-actions { display: flex; align-items: center; gap: 4px; }
+.selection-actions button {
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 6px;
+  background: var(--deep);
+  color: var(--charcoal);
+  cursor: pointer;
+  font-size: 11px;
+}
+.selection-actions button:hover:not(:disabled) { color: var(--ink); background: var(--elevated); }
+.selection-actions button:disabled { cursor: not-allowed; opacity: .35; }
+.selection-actions .danger-action:hover { color: var(--red); }
 .file-list { list-style: none; padding: 8px; margin: 0; height: 556px; overflow-y: scroll; scrollbar-color: var(--stone) var(--card); scrollbar-width: auto; }
 .file-list::-webkit-scrollbar { width: 10px; }
 .file-list::-webkit-scrollbar-track { background: var(--card); border-left: 1px solid var(--hairline); }
 .file-list::-webkit-scrollbar-thumb { background: var(--stone); border: 2px solid var(--card); border-radius: 999px; }
 .file-list li {
   display: grid;
-  grid-template-columns: minmax(125px, 1fr) auto auto auto;
+  grid-template-columns: 28px minmax(125px, 1fr) auto auto auto;
   align-items: center;
   gap: 5px;
   min-height: 45px;
@@ -231,6 +259,8 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   border-bottom: 1px solid var(--divider);
 }
 .file-list li:hover { background: rgba(255,255,255,.025); }
+.file-list li.is-selected { background: rgba(59,158,255,.09); }
+.entry-select { width: 15px; height: 15px; margin: 0 auto; accent-color: var(--blue); cursor: pointer; }
 .file-list button, .file-action {
   min-height: 36px;
   padding: 8px 10px;
@@ -240,7 +270,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   font-size: 12px;
   white-space: nowrap;
 }
-.file-list li > button:first-child {
+.file-list li > button.entry-name, .file-list li > button.parent-row {
   width: 100%;
   display: block;
   overflow: hidden;
@@ -310,6 +340,36 @@ textarea {
 .CodeMirror-linenumber { color: var(--stone) !important; }
 .CodeMirror-cursor { border-left-color: var(--ink) !important; }
 
+.input-dialog {
+  width: min(440px, calc(100% - 28px));
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 28px 90px rgba(0,0,0,.72);
+}
+.input-dialog::backdrop { background: rgba(0,0,0,.76); backdrop-filter: blur(6px); }
+.input-dialog form { padding: 24px; }
+.dialog-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.dialog-heading .panel-kicker { margin-bottom: 5px; }
+.dialog-heading h2 { margin: 0; font-family: var(--serif); font-size: 30px; font-weight: 400; letter-spacing: -.6px; }
+.dialog-close { width: 32px; height: 32px; border: 1px solid var(--hairline-strong); border-radius: 7px; background: transparent; color: var(--mute); cursor: pointer; font-size: 19px; }
+.dialog-close:hover { background: var(--elevated); color: var(--ink); }
+.input-dialog label { display: block; margin-bottom: 8px; color: var(--charcoal); font-size: 12px; }
+.input-dialog input { width: 100%; height: 46px; padding: 0 13px; border: 1px solid var(--hairline-strong); border-radius: 8px; background: var(--deep); color: var(--ink); font-family: var(--mono); }
+.input-dialog input:focus { border-color: var(--blue); outline: 0; box-shadow: 0 0 0 3px rgba(59,158,255,.12); }
+.input-dialog input.is-invalid { border-color: var(--red); }
+.dialog-error { min-height: 18px; margin: 7px 0 0; color: var(--red); font-family: var(--mono); font-size: 11px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.toast-region { position: fixed; z-index: 100; right: 20px; bottom: 20px; width: min(360px, calc(100% - 28px)); display: grid; gap: 8px; pointer-events: none; }
+.app-toast { padding: 13px 14px; display: grid; grid-template-columns: 8px minmax(0,1fr); gap: 11px; border: 1px solid var(--hairline-strong); border-radius: 9px; background: rgba(10,10,12,.96); color: var(--body); box-shadow: 0 18px 50px rgba(0,0,0,.55); font-size: 12px; line-height: 1.45; animation: toast-in .18s ease-out; }
+.app-toast::before { content: ''; width: 7px; height: 7px; margin-top: 5px; border-radius: 50%; background: var(--green); }
+.app-toast.is-error::before { background: var(--red); box-shadow: 0 0 12px rgba(255,32,71,.5); }
+.app-toast strong { display: block; margin-bottom: 2px; color: var(--ink); font-size: 12px; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+
 .login-page { overflow-x: hidden; }
 .login-page::before {
   content: '';
@@ -352,6 +412,10 @@ textarea {
 .card-content { padding: 34px; }
 .card-content h2 { margin: 0; font-family: var(--serif); font-size: 34px; font-weight: 400; letter-spacing: -.8px; }
 .card-description { margin: 10px 0 28px; color: var(--mute); line-height: 1.5; }
+.login-alert { margin: -8px 0 18px; padding: 12px; border: 1px solid rgba(255,32,71,.28); border-radius: 8px; background: rgba(255,32,71,.08); }
+.login-alert strong, .login-alert span { display: block; }
+.login-alert strong { margin-bottom: 3px; color: var(--ink); font-size: 12px; }
+.login-alert div span { color: var(--mute); font-size: 11px; line-height: 1.45; }
 .login-form { display: grid; gap: 10px; }
 .login-form label { margin-top: 8px; color: var(--charcoal); font-size: 12px; }
 .login-form input {
@@ -392,7 +456,7 @@ textarea {
   .traffic-lights { gap: 5px; }
   .traffic-lights span { width: 7px; height: 7px; }
   #save-btn { min-height: 40px; padding: 8px 11px; font-size: 12px; }
-  .file-list li { grid-template-columns: minmax(120px, 1fr) auto auto; }
+  .file-list li { grid-template-columns: 28px minmax(120px, 1fr) auto auto; }
   .file-list .file-action { display: none; }
   .login-main { width: calc(100% - 28px); padding: 48px 0 64px; }
   .login-copy h1 { font-size: clamp(54px, 17vw, 76px); }
@@ -406,8 +470,13 @@ textarea {
   .wordmark { font-size: 15px; }
   .workspace { padding-top: 34px; }
   .workspace-intro { padding-left: 2px; padding-right: 2px; }
-  .file-list li { grid-template-columns: minmax(110px,1fr) auto; }
+  .selection-bar { align-items: flex-start; flex-direction: column; }
+  .selection-actions { width: 100%; }
+  .selection-actions button { flex: 1; }
+  .file-list li { grid-template-columns: 28px minmax(110px,1fr) auto; }
   .file-list li > button:nth-of-type(2) { display: none; }
   .editor-hint { display: none; }
   .window-title { text-align: left; }
+  .toast-region { right: 14px; bottom: 14px; }
+  .input-dialog form { padding: 20px; }
 }

@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/vendor/codemirror/lib/codemirror.min.css">
   <link rel="stylesheet" href="/static/vendor/codemirror/theme/material-darker.min.css">
-  <link rel="stylesheet" href="/static/css/app.css?v=20260722-3">
+  <link rel="stylesheet" href="/static/css/app.css?v=20260727-2">
 </head>
 <body class="app-page">
   <header class="nav-bar">
@@ -45,7 +45,8 @@
               <button class="view-button" type="button" data-view="split">Split</button>
               <button class="view-button" type="button" data-view="editor">Editor</button>
             </div>
-            <button id="new-folder-btn" class="icon-button" type="button" title="New folder" aria-label="New folder">+</button>
+            <button id="new-file-btn" class="icon-button" type="button" title="New file" aria-label="New file">＋</button>
+            <button id="new-folder-btn" class="icon-button" type="button" title="New folder" aria-label="New folder">▱</button>
             <label class="icon-button upload-label" title="Upload file" aria-label="Upload file">
               ↑
               <input id="upload-input" type="file" hidden>
@@ -53,6 +54,15 @@
           </div>
         </div>
         <nav class="path-line" aria-label="Current path"><span class="status-dot"></span><div id="browse-path" class="breadcrumbs"></div></nav>
+        <div id="selection-bar" class="selection-bar" hidden>
+          <span id="selection-count">0 selected</span>
+          <div class="selection-actions">
+            <button id="zip-selected-btn" type="button">Zip</button>
+            <button id="unzip-selected-btn" type="button">Unzip</button>
+            <button id="delete-selected-btn" class="danger-action" type="button">Delete</button>
+            <button id="clear-selection-btn" type="button">Clear</button>
+          </div>
+        </div>
         <ul id="file-list" class="file-list">
           <li class="loading-row">Loading filesystem…</li>
         </ul>
@@ -83,6 +93,26 @@
     </section>
   </main>
 
+  <dialog id="input-dialog" class="input-dialog" aria-labelledby="dialog-title">
+    <form id="input-dialog-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <p id="dialog-kicker" class="panel-kicker">FILESYSTEM ACTION</p>
+          <h2 id="dialog-title">Create file</h2>
+        </div>
+        <button id="dialog-close-btn" class="dialog-close" type="button" aria-label="Close">×</button>
+      </div>
+      <label id="dialog-label" for="dialog-input">File name</label>
+      <input id="dialog-input" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <p id="dialog-error" class="dialog-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button id="dialog-cancel-btn" class="button button-outline" type="button">Cancel</button>
+        <button id="dialog-submit-btn" class="button button-primary" type="submit">Create file</button>
+      </div>
+    </form>
+  </dialog>
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
   <script src="/static/vendor/codemirror/lib/codemirror.min.js"></script>
   <script src="/static/vendor/codemirror/mode/javascript/javascript.min.js"></script>
   <script src="/static/vendor/codemirror/mode/css/css.min.js"></script>
@@ -92,7 +122,7 @@
   <script src="/static/vendor/codemirror/mode/python/python.min.js"></script>
   <script src="/static/vendor/codemirror/mode/shell/shell.min.js"></script>
   <script src="/static/vendor/codemirror/mode/go/go.min.js"></script>
-  <script src="/static/js/app.js?v=20260722-3"></script>
+  <script src="/static/js/app.js?v=20260727-2"></script>
   <script src="/static/js/editor.js?v=20260722-3"></script>
   <script src="/static/js/upload.js?v=20260722-3"></script>
 </body>

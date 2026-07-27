@@ -76,6 +76,24 @@ func (s *Service) CreateFolder(requestedPath string) error {
 	return os.MkdirAll(resolved, 0o755)
 }
 
+func (s *Service) CreateFile(requestedPath string) error {
+	resolved, err := utils.SafeJoin(s.root, requestedPath)
+	if err != nil {
+		return err
+	}
+	if resolved == s.root {
+		return errors.New("file path is required")
+	}
+	if err := os.MkdirAll(filepath.Dir(resolved), 0o755); err != nil {
+		return err
+	}
+	file, err := os.OpenFile(resolved, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		return err
+	}
+	return file.Close()
+}
+
 func (s *Service) Rename(oldPath, newPath string) error {
 	resolvedOld, err := utils.SafeJoin(s.root, oldPath)
 	if err != nil {

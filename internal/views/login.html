@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/css/app.css?v=20260722-3">
+  <link rel="stylesheet" href="/static/css/app.css?v=20260727-2">
 </head>
 <body class="login-page">
   <header class="nav-bar login-nav">
@@ -35,9 +35,14 @@
         <p class="panel-kicker">SECURE SESSION</p>
         <h2 id="login-title">Sign in to your VPS</h2>
         <p class="card-description">Use the same root credentials as your SSH login.</p>
+        {{if .Error}}
+        <div class="login-alert" role="alert">
+          <div><strong>Access denied</strong><span>{{.Error}}</span></div>
+        </div>
+        {{end}}
         <form method="post" action="/login" class="login-form">
           <label for="username">Username</label>
-          <input id="username" name="username" value="root" autocomplete="username" autocapitalize="none" spellcheck="false">
+          <input id="username" name="username" value="{{if .Username}}{{.Username}}{{else}}root{{end}}" autocomplete="username" autocapitalize="none" spellcheck="false">
           <label for="password">Password</label>
           <input id="password" name="password" type="password" placeholder="Your VPS password" autocomplete="current-password">
           <button class="button button-primary login-submit" type="submit">Open filesystem</button>

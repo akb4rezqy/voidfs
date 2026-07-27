@@ -1,5 +1,6 @@
 window.currentListPath = '/';
 window.workspaceView = 'files';
+window.selectedEntries = new Map();
 
 function setWorkspaceView(view) {
   const shell = document.querySelector('.product-shell');
@@ -43,6 +44,68 @@ async function apiJSON(url, options = {}) {
   return response.json();
 }
 
+function showToast(title, message, type = 'success') {
+  const region = document.getElementById('toast-region');
+  if (!region) return;
+  const toast = document.createElement('div');
+  toast.className = `app-toast${type === 'error' ? ' is-error' : ''}`;
+  const content = document.createElement('div');
+  const heading = document.createElement('strong');
+  const detail = document.createElement('span');
+  heading.textContent = title;
+  detail.textContent = message;
+  content.appendChild(heading);
+  content.appendChild(detail);
+  toast.appendChild(content);
+  region.appendChild(toast);
+  window.setTimeout(() => toast.remove(), 4000);
+}
+
+function closeInputDialog(value = null) {
+  const dialog = document.getElementById('input-dialog');
+  if (!dialog || !window.inputDialogResolve) return;
+  const resolve = window.inputDialogResolve;
+  window.inputDialogResolve = null;
+  if (typeof dialog.close === 'function') {
+    dialog.close();
+  } else {
+    dialog.removeAttribute('open');
+  }
+  resolve(value);
+}
+
+function requestInput({ title, label, value = '', action }) {
+  const dialog = document.getElementById('input-dialog');
+  const titleElement = document.getElementById('dialog-title');
+  const labelElement = document.getElementById('dialog-label');
+  const input = document.getElementById('dialog-input');
+  const submit = document.getElementById('dialog-submit-btn');
+  const error = document.getElementById('dialog-error');
+  if (!dialog || !titleElement || !labelElement || !input || !submit || !error) {
+    return Promise.resolve(null);
+  }
+
+  titleElement.textContent = title;
+  labelElement.textContent = label;
+  input.value = value;
+  input.classList.remove('is-invalid');
+  error.textContent = '';
+  submit.textContent = action;
+  if (typeof dialog.showModal === 'function') {
+    dialog.showModal();
+  } else {
+    dialog.setAttribute('open', '');
+  }
+  window.setTimeout(() => {
+    input.focus();
+    input.select();
+  }, 0);
+
+  return new Promise((resolve) => {
+    window.inputDialogResolve = resolve;
+  });
+}
+
 function renderBreadcrumbs(path) {
   const container = document.getElementById('browse-path');
   if (!container) return;
@@ -70,8 +133,36 @@ function renderBreadcrumbs(path) {
   });
 }
 
+function updateSelectionBar() {
+  const bar = document.getElementById('selection-bar');
+  const count = document.getElementById('selection-count');
+  const unzipButton = document.getElementById('unzip-selected-btn');
+  const entries = Array.from(window.selectedEntries.values());
+  if (!bar || !count || !unzipButton) return;
+  bar.hidden = entries.length === 0;
+  count.textContent = `${entries.length} selected`;
+  unzipButton.disabled = entries.length === 0 || entries.some((entry) => entry.IsDir || !entry.Name.toLowerCase().endsWith('.zip'));
+}
+
+function clearSelection() {
+  window.selectedEntries.clear();
+  document.querySelectorAll('.entry-select').forEach((checkbox) => {
+    checkbox.checked = false;
+  });
+  document.querySelectorAll('.file-list li.is-selected').forEach((row) => {
+    row.classList.remove('is-selected');
+  });
+  updateSelectionBar();
+}
+
+function selectedPaths() {
+  return Array.from(window.selectedEntries.keys());
+}
+
 async function loadFiles(path = '/') {
   window.currentListPath = path;
+  window.selectedEntries.clear();
+  updateSelectionBar();
   const data = await apiJSON(`/files?path=${encodeURIComponent(path)}`);
   const list = document.getElementById('file-list');
   renderBreadcrumbs(path);
@@ -96,6 +187,20 @@ async function loadFiles(path = '/') {
 
   for (const entry of data.entries) {
     const li = document.createElement('li');
+    const select = document.createElement('input');
+    select.type = 'checkbox';
+    select.className = 'entry-select';
+    select.setAttribute('aria-label', `Select ${entry.Name}`);
+    select.addEventListener('click', (event) => event.stopPropagation());
+    select.addEventListener('change', () => {
+      if (select.checked) {
+        window.selectedEntries.set(entry.Path, entry);
+      } else {
+        window.selectedEntries.delete(entry.Path);
+      }
+      li.classList.toggle('is-selected', select.checked);
+      updateSelectionBar();
+    });
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = entry.Name;
@@ -113,16 +218,26 @@ async function loadFiles(path = '/') {
     renameBtn.textContent = 'Rename';
     renameBtn.addEventListener('click', async (event) => {
       event.stopPropagation();
-      const nextName = prompt('Rename to:', entry.Name);
+      const nextName = await requestInput({
+        title: 'Rename item',
+        label: `New name for ${entry.Name}`,
+        value: entry.Name,
+        action: 'Rename',
+      });
       if (!nextName || nextName === entry.Name) return;
       const base = entry.Path.split('/').slice(0, -1).join('/');
       const target = base ? `${base}/${nextName}` : nextName;
-      await apiJSON('/files/rename', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ oldPath: entry.Path, newPath: target }),
-      });
-      await loadFiles(window.currentListPath);
+      try {
+        await apiJSON('/files/rename', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ oldPath: entry.Path, newPath: target }),
+        });
+        await loadFiles(window.currentListPath);
+        showToast('Item renamed', `${entry.Name} is now ${nextName}.`);
+      } catch (error) {
+        showToast('Rename failed', error.message.trim(), 'error');
+      }
     });
 
     let downloadLink = null;
@@ -147,6 +262,7 @@ async function loadFiles(path = '/') {
       await loadFiles(window.currentListPath);
     });
 
+    li.appendChild(select);
     li.appendChild(button);
     li.appendChild(renameBtn);
     if (downloadLink) li.appendChild(downloadLink);
@@ -184,19 +300,154 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeButton = document.getElementById('close-editor-btn');
   if (closeButton) closeButton.addEventListener('click', closeEditor);
 
-  const folderBtn = document.getElementById('new-folder-btn');
-  if (folderBtn) {
-    folderBtn.addEventListener('click', async () => {
-      const name = prompt('Folder name:');
+  const clearSelectionButton = document.getElementById('clear-selection-btn');
+  if (clearSelectionButton) clearSelectionButton.addEventListener('click', clearSelection);
+
+  const deleteSelectedButton = document.getElementById('delete-selected-btn');
+  if (deleteSelectedButton) {
+    deleteSelectedButton.addEventListener('click', async () => {
+      const paths = selectedPaths();
+      if (!paths.length || !confirm(`Delete ${paths.length} selected item(s)?`)) return;
+      try {
+        await apiJSON('/files/delete-many', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths }),
+        });
+        await loadFiles(window.currentListPath);
+      } catch (error) {
+        showToast('Delete failed', error.message.trim(), 'error');
+      }
+    });
+  }
+
+  const zipSelectedButton = document.getElementById('zip-selected-btn');
+  if (zipSelectedButton) {
+    zipSelectedButton.addEventListener('click', async () => {
+      const paths = selectedPaths();
+      if (!paths.length) return;
+      let name = await requestInput({
+        title: 'Create archive',
+        label: 'Archive name',
+        value: 'archive.zip',
+        action: 'Create ZIP',
+      });
+      if (!name) return;
+      if (!name.toLowerCase().endsWith('.zip')) name += '.zip';
+      const base = window.currentListPath === '/' ? '' : window.currentListPath;
+      const destination = base ? `${base}/${name}` : name;
+      try {
+        await apiJSON('/files/zip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths, destination }),
+        });
+        await loadFiles(window.currentListPath);
+      } catch (error) {
+        showToast('ZIP failed', error.message.trim(), 'error');
+      }
+    });
+  }
+
+  const unzipSelectedButton = document.getElementById('unzip-selected-btn');
+  if (unzipSelectedButton) {
+    unzipSelectedButton.addEventListener('click', async () => {
+      const paths = selectedPaths();
+      if (!paths.length) return;
+      try {
+        await apiJSON('/files/unzip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths }),
+        });
+        await loadFiles(window.currentListPath);
+      } catch (error) {
+        showToast('Unzip failed', error.message.trim(), 'error');
+      }
+    });
+  }
+
+  const fileBtn = document.getElementById('new-file-btn');
+  if (fileBtn) {
+    fileBtn.addEventListener('click', async () => {
+      const name = await requestInput({
+        title: 'Create file',
+        label: 'File name',
+        action: 'Create file',
+      });
       if (!name) return;
       const base = window.currentListPath === '/' ? '' : window.currentListPath;
       const target = base ? `${base}/${name}` : name;
-      await apiJSON('/files/folder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: target }),
+      try {
+        await apiJSON('/files/file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: target }),
+        });
+        await loadFiles(window.currentListPath);
+        await openFile(target);
+        showToast('File created', `${name} is ready to edit.`);
+      } catch (error) {
+        showToast('Create file failed', error.message.trim(), 'error');
+      }
+    });
+  }
+
+  const folderBtn = document.getElementById('new-folder-btn');
+  if (folderBtn) {
+    folderBtn.addEventListener('click', async () => {
+      const name = await requestInput({
+        title: 'Create folder',
+        label: 'Folder name',
+        action: 'Create folder',
       });
-      await loadFiles(window.currentListPath);
+      if (!name) return;
+      const base = window.currentListPath === '/' ? '' : window.currentListPath;
+      const target = base ? `${base}/${name}` : name;
+      try {
+        await apiJSON('/files/folder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: target }),
+        });
+        await loadFiles(window.currentListPath);
+        showToast('Folder created', `${name} was added to this directory.`);
+      } catch (error) {
+        showToast('Create folder failed', error.message.trim(), 'error');
+      }
+    });
+  }
+
+  const dialog = document.getElementById('input-dialog');
+  const dialogForm = document.getElementById('input-dialog-form');
+  const dialogInput = document.getElementById('dialog-input');
+  const dialogError = document.getElementById('dialog-error');
+  if (dialogForm && dialogInput && dialogError) {
+    dialogForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const value = dialogInput.value.trim();
+      if (!value) {
+        dialogInput.classList.add('is-invalid');
+        dialogError.textContent = 'A name is required.';
+        dialogInput.focus();
+        return;
+      }
+      closeInputDialog(value);
+    });
+    dialogInput.addEventListener('input', () => {
+      dialogInput.classList.remove('is-invalid');
+      dialogError.textContent = '';
+    });
+  }
+  const cancelDialog = () => closeInputDialog(null);
+  const dialogCancelButton = document.getElementById('dialog-cancel-btn');
+  const dialogCloseButton = document.getElementById('dialog-close-btn');
+  if (dialogCancelButton) dialogCancelButton.addEventListener('click', cancelDialog);
+  if (dialogCloseButton) dialogCloseButton.addEventListener('click', cancelDialog);
+  if (dialog) {
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      cancelDialog();
     });
   }
 });
